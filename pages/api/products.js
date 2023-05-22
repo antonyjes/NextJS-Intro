@@ -5,8 +5,13 @@ export default async function handle(req, res) {
   const { method } = req;
   await mongooseConnect();
   if (method === "GET") {
-    const products = await Product.find();
-    res.json(products);
+    if (req.query?.id) {
+      const product = await Product.findById(req.query.id);
+      res.json(product);
+    } else {
+      const products = await Product.find();
+      res.json(products);
+    }
   }
 
   if (method === "POST") {
@@ -17,5 +22,16 @@ export default async function handle(req, res) {
       price,
     });
     res.json(productDoc);
+  }
+
+  if (method === "PATCH") {
+    const { title, description, price } = req.body;
+    const { id } = req.query;
+    await Product.findByIdAndUpdate(id, {
+      title,
+      description,
+      price,
+    });
+    res.json(true);
   }
 }

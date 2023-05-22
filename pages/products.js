@@ -7,7 +7,7 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const getProducts = async () => {
     const response = await axios.get("/api/products");
-    const data = response.data;
+    const data = await response.data;
     setProducts(data);
   };
 
@@ -35,7 +35,7 @@ const Products = () => {
             <tr key={product._id}>
               <td>{product.title}</td>
               <td>
-                <Link className="btn-default" href={"/products"}>
+                <Link className="btn-default" href={`/products/edit/${product._id}`}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
