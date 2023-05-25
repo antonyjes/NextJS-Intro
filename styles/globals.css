@@ -35,7 +35,7 @@ table.basic thead tr th {
 table.basic tr td {
   @apply px-4 py-1;
 }
-table.basic a {
+table.basic a, table.basic button {
   @apply px-4 rounded-sm inline-flex mx-1 items-center gap-1 text-sm py-1;
 }
 .btn-default,
@@ -47,4 +47,10 @@ table.basic a {
 }
 .btn-default {
   @apply bg-white text-gray-800 px-4 py-1 rounded-sm border border-gray-200 shadow-sm;
+}
+.no-opacity{
+  opacity: 1 !important;
+}
+.modal-opacity:not(.no-opacity){
+  opacity: 0.4;
 }

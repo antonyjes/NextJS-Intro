@@ -1,10 +1,14 @@
 import Layout from "@/components/Layout";
+import ModalDelete from "@/components/ModalDelete";
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState([]);
+
   const getProducts = async () => {
     const response = await axios.get("/api/products");
     const data = await response.data;
@@ -35,7 +39,10 @@ const Products = () => {
             <tr key={product._id}>
               <td>{product.title}</td>
               <td>
-                <Link className="btn-default" href={`/products/edit/${product._id}`}>
+                <Link
+                  className="btn-default"
+                  href={`/products/edit/${product._id}`}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -52,7 +59,13 @@ const Products = () => {
                   </svg>
                   Edit
                 </Link>
-                <Link className="btn-red" href={"/products"}>
+                <button
+                  className="btn-red"
+                  onClick={() => {
+                    setShowModal(true);
+                    setCurrentProduct(product);
+                  }}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -68,12 +81,19 @@ const Products = () => {
                     />
                   </svg>
                   Delete
-                </Link>
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {showModal && (
+        <ModalDelete
+          setShowModal={setShowModal}
+          currentProduct={currentProduct}
+          getProducts={getProducts}
+        />
+      )}
     </Layout>
   );
 };
