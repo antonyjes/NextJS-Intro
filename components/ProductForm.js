@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { ColorRing } from "react-loader-spinner";
+import { ReactSortable } from "react-sortablejs";
 
 const ProductForm = ({ action, productInfo }) => {
   const [title, setTitle] = useState(productInfo?.title || "");
@@ -8,11 +10,13 @@ const ProductForm = ({ action, productInfo }) => {
     productInfo?.description || ""
   );
   const [price, setPrice] = useState(productInfo?.price || "");
+  const [images, setImages] = useState(productInfo?.images || []);
+  const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
 
   const createProduct = async (e) => {
     e.preventDefault();
-    const data = { title, description, price };
+    const data = { title, description, price, images };
     if (productInfo?._id) {
       //update
       await axios.patch(`/api/products?id=${productInfo._id}`, data);
@@ -25,16 +29,20 @@ const ProductForm = ({ action, productInfo }) => {
   const uploadImages = async (e) => {
     const files = e.target?.files;
     if (files?.length > 0) {
+      setIsUploading(true);
       const data = new FormData();
       for (const file of files) {
         data.append("file", file);
       }
-      const res = await axios.post("/api/upload", data, {headers: {
-        "Content-Type" : "multipart/form-data",
-      }});
-      console.log(res);
+      const res = await axios.post("/api/upload", data);
+      setImages([...images, res.data.links]);
+      setIsUploading(false);
     }
   };
+
+  const updateImagesOrder = (images) => {
+    setImages(images);
+  }
 
   return (
     <form onSubmit={createProduct}>
@@ -47,7 +55,21 @@ const ProductForm = ({ action, productInfo }) => {
         onChange={(e) => setTitle(e.target.value)}
       />
       <label>Photos</label>
-      <div>
+      <div className="mb-2 flex flex-wrap gap-1">
+        <ReactSortable list={images} className="flex flex-wrap gap-1" setList={updateImagesOrder}>
+          {
+            images?.length > 0 && images.map(link => (
+              <div key={link} className="h-24 bg-white shadow-sm rounded-sm border border-gray-200" >
+                <img src={link} alt="" className="rounded-lg" />
+              </div>
+            ))
+          }
+        </ReactSortable>
+        {isUploading && (
+            <div className="h-24 flex items-center">
+              <ColorRing />
+            </div>
+          )}
         <label className="w-24 h-24 cursor-pointer border flex items-center justify-center text-sm gap-1 text-gray-500 rounded-lg bg-gray-200">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +92,6 @@ const ProductForm = ({ action, productInfo }) => {
             onChange={uploadImages}
           />
         </label>
-        {!productInfo?.images?.length && <div>No photos in this product</div>}
       </div>
       <label>Description</label>
       <textarea
