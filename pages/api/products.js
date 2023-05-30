@@ -1,5 +1,6 @@
 import { mongooseConnect } from "@/lib/moongose";
 import { Product } from "@/models/Product";
+import updateImages from "./updateImages";
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -28,6 +29,9 @@ export default async function handle(req, res) {
   if (method === "PATCH") {
     const { title, description, price, images } = req.body;
     const { id } = req.query;
+
+    await updateImages(id, images);
+
     await Product.findByIdAndUpdate(id, {
       title,
       description,

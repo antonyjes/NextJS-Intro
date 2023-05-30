@@ -42,7 +42,13 @@ const ProductForm = ({ action, productInfo }) => {
 
   const updateImagesOrder = (images) => {
     setImages(images);
-  }
+  };
+
+  const handleDeleteImage = (index) => {
+    const updatedImages = [...images];
+    updatedImages.splice(index, 1);
+    setImages(updatedImages);
+  };
 
   return (
     <form onSubmit={createProduct}>
@@ -56,20 +62,45 @@ const ProductForm = ({ action, productInfo }) => {
       />
       <label>Photos</label>
       <div className="mb-2 flex flex-wrap gap-1">
-        <ReactSortable list={images} className="flex flex-wrap gap-1" setList={updateImagesOrder}>
-          {
-            images?.length > 0 && images.map(link => (
-              <div key={link} className="h-24 bg-white shadow-sm rounded-sm border border-gray-200" >
+        <ReactSortable
+          list={images}
+          className="flex flex-wrap gap-1"
+          setList={updateImagesOrder}
+        >
+          {images?.length > 0 &&
+            images.map((link, index) => (
+              <div
+                key={link}
+                className="h-24 bg-white shadow-sm rounded-sm border border-gray-200 relative flex items-center justify-center"
+              >
                 <img src={link} alt="" className="rounded-lg" />
+                <button
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-red-500 rounded-full p-1 transition-opacity opacity-0 hover:opacity-100"
+                  onClick={() => handleDeleteImage(index)}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
-            ))
-          }
+            ))}
         </ReactSortable>
         {isUploading && (
-            <div className="h-24 flex items-center">
-              <ColorRing />
-            </div>
-          )}
+          <div className="h-24 flex items-center">
+            <ColorRing />
+          </div>
+        )}
         <label className="w-24 h-24 cursor-pointer border flex items-center justify-center text-sm gap-1 text-gray-500 rounded-lg bg-gray-200">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -86,11 +117,7 @@ const ProductForm = ({ action, productInfo }) => {
             />
           </svg>
           <div>Upload</div>
-          <input
-            className="hidden"
-            type="file"
-            onChange={uploadImages}
-          />
+          <input className="hidden" type="file" onChange={uploadImages} />
         </label>
       </div>
       <label>Description</label>
