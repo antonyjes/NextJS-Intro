@@ -1,39 +1,32 @@
-import { Product } from "@/models/Product";
-import { DeleteObjectsCommand, S3Client } from "@aws-sdk/client-s3";
+import { S3 } from "@aws-sdk/client-s3";
 const bucketName = "jes-next-ecommerce";
 
-const deleteS3Objects = async (imagesToDelete) => {
-  const client = new S3Client({
-    region: "us-east-2",
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY,
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    },
+const deleteS3Image = async (image) => {
+  const url = new URL(image);
+  const keyImage = url.pathname;
+
+  const s3 = new S3({
+    region: 'us-east-2',
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
   });
 
   const params = {
     Bucket: bucketName,
-    Delete: {
-      Objects: imagesToDelete,
-    },
+    Key: keyImage,
   };
 
   try {
-    const response = await client.send(new DeleteObjectsCommand(params));
-    console.log("Deleted objects:", response.Deleted);
+    console.log("Deleting image...");
+    const response = await s3.deleteObject(params);
+    if (response.statusCode === 200) {
+      console.log("Image deleted successfully");
+    } else {
+      console.error("Error deleting image:", response.message);
+    }
   } catch (error) {
-    console.error("Error deleting objects:", error.message); // Log the error message
+    console.error("Error deleting image:", error.message);
   }
 };
 
-const updateImages = async (productId, newImages) => {
-  const product = await Product.findById(productId);
-
-  const imagesToDelete = product.images.filter(
-    (image) => !newImages.includes(image)
-  );
-
-  deleteS3Objects(imagesToDelete.map((image) => ({ Key: image })));
-};
-
-export default updateImages;
+export default deleteS3Image;

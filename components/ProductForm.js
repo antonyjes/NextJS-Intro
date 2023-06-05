@@ -1,3 +1,4 @@
+import deleteS3Image from "@/pages/api/updateImages";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -44,10 +45,15 @@ const ProductForm = ({ action, productInfo }) => {
     setImages(images);
   };
 
-  const handleDeleteImage = (index) => {
+  const handleDeleteImage = async(index, link) => {
     const updatedImages = [...images];
     updatedImages.splice(index, 1);
     setImages(updatedImages);
+    try {
+      await deleteS3Image(link);
+    } catch (error) {
+      console.error("Error deleting image:", error.message);
+    }  
   };
 
   return (
@@ -76,7 +82,7 @@ const ProductForm = ({ action, productInfo }) => {
                 <img src={link} alt="" className="rounded-lg" />
                 <button
                   className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white bg-red-500 rounded-full p-1 transition-opacity opacity-0 hover:opacity-100"
-                  onClick={() => handleDeleteImage(index)}
+                  onClick={() => handleDeleteImage(index, link)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

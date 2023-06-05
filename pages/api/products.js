@@ -1,6 +1,6 @@
 import { mongooseConnect } from "@/lib/moongose";
 import { Product } from "@/models/Product";
-import updateImages from "./updateImages";
+import deleteS3Image from "./updateImages.js";
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -21,7 +21,7 @@ export default async function handle(req, res) {
       title,
       description,
       price,
-      images
+      images,
     });
     res.json(productDoc);
   }
@@ -30,19 +30,19 @@ export default async function handle(req, res) {
     const { title, description, price, images } = req.body;
     const { id } = req.query;
 
-    await updateImages(id, images);
-
     await Product.findByIdAndUpdate(id, {
       title,
       description,
       price,
-      images
+      images,
     });
     res.json(true);
   }
 
   if (method === "DELETE") {
     if (req.query?.id) {
+      const product = await Product.findById(req.query?.id);
+      product.images.map((image) => deleteS3Image(image));
       await Product.findByIdAndDelete(req.query.id);
       res.json(true);
     }
